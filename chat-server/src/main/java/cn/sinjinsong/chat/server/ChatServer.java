@@ -1,4 +1,4 @@
-package cn.sinjinsong.chat.server;
+    package cn.sinjinsong.chat.server;
 
 import cn.sinjinsong.chat.server.exception.handler.InterruptedExceptionHandler;
 import cn.sinjinsong.chat.server.handler.message.MessageHandler;
@@ -53,18 +53,33 @@ public class ChatServer {
 
     private void initServer() {
         try {
+            // 创建一个nio的SocketChannel，用于从TCP读取数据
             serverSocketChannel = ServerSocketChannel.open();
             //切换为非阻塞模式
             serverSocketChannel.configureBlocking(false);
+            
+            // 绑定socket PORT
             serverSocketChannel.bind(new InetSocketAddress(PORT));
-            //获得选择器
+            
+            // 做一个选择器
+            // 监听所有的Channel，避免context-switch的成本
             selector = Selector.open();
+            
+            
             //将channel注册到selector上
             //第二个参数是选择键，用于说明selector监控channel的状态
             //可能的取值：SelectionKey.OP_READ OP_WRITE OP_CONNECT OP_ACCEPT
             //监控的是channel的接收状态
             serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
+            
+            // 建立一个读取数据的线程池
+            // 5 : corePoolSize
+            // 10 : maximumnPoolSize 
+            // 1000 : keepAliveTime 当thread数量超过corePoolSize时，如果1s闲置则回收
+            // 10: task队列的大小
             this.readPool = new ThreadPoolExecutor(5, 10, 1000, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<Runnable>(10), new ThreadPoolExecutor.CallerRunsPolicy());
+            
+            
             this.downloadTaskQueue = new ArrayBlockingQueue<>(20);
             this.taskManagerThread = new TaskManagerThread(downloadTaskQueue);
             this.taskManagerThread.setUncaughtExceptionHandler(SpringContextUtil.getBean("taskExceptionHandler"));
