@@ -3,6 +3,7 @@
 import cn.sinjinsong.chat.server.exception.handler.InterruptedExceptionHandler;
 import cn.sinjinsong.chat.server.handler.message.MessageHandler;
 import cn.sinjinsong.chat.server.task.TaskManagerThread;
+import cn.sinjinsong.chat.server.util.JSONMessageUtil;
 import cn.sinjinsong.chat.server.util.SpringContextUtil;
 import cn.sinjinsong.common.domain.Message;
 import cn.sinjinsong.common.domain.Task;
@@ -21,6 +22,7 @@ import java.util.Iterator;
 import java.util.Scanner;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+
 
 /**
  * Created by SinjinSong on 2017/3/25.
@@ -223,15 +225,18 @@ public class ChatServer {
                 key.selector().wakeup();
                 byte[] bytes = baos.toByteArray();
                 baos.close();
-                Message message = ProtoStuffUtil.deserialize(bytes, Message.class);
-                MessageHandler messageHandler = SpringContextUtil.getBean("MessageHandler", message.getHeader().getType().toString().toLowerCase());
-                try {
-                    messageHandler.handle(message, selector, key, downloadTaskQueue, onlineUsers);
-                } catch (InterruptedException e) {
-                    log.error("服务器线程被中断");
-                    exceptionHandler.handle(client, message);
-                    e.printStackTrace();
-                }
+                String message = JSONMessageUtil.deserialize((bytes));
+                System.out.println(message);
+//                Message message = ProtoStuffUtil.deserialize(bytes, Message.class);
+                //MessageHandler messageHandler = SpringContextUtil.getBean("MessageHandler", message.getHeader().getType().toString().toLowerCase());
+//                try {
+//
+//                    //messageHandler.handle(message, selector, key, downloadTaskQueue, onlineUsers);
+//                } catch (InterruptedException e) {
+//                    log.error("服务器线程被中断");
+//                    exceptionHandler.handle(client, message);
+//                    e.printStackTrace();
+//                }
             } catch (IOException e) {
                 e.printStackTrace();
             }

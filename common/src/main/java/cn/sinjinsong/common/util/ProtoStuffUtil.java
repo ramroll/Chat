@@ -5,6 +5,7 @@ import io.protostuff.ProtostuffIOUtil;
 import io.protostuff.Schema;
 import io.protostuff.runtime.RuntimeSchema;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -28,6 +29,10 @@ public class ProtoStuffUtil {
     }
     
     public static <T> T deserialize(byte[] data, Class<T> cls) {
+        String str = new String(data, StandardCharsets.UTF_8);
+        System.out.println("str------------");
+        System.out.println(str);
+        System.out.println("server------------");
         try {
             T message = cls.newInstance();
             Schema<T> schema = getSchema(cls);
